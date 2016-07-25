@@ -10,11 +10,9 @@ import numpy      as np
 #                       #
 #########################
 
-hidden_layer = [ 9, 6, 5 ]
 num_of_hidden1 = 12
 num_of_step = 1000
-dfrm = pd.read_csv('iris.csv')
-
+dfrm = pd.read_csv('data/iris.csv')
 
 #
 # Convert Data.Frame to numpy array
@@ -66,25 +64,14 @@ def bias_variable(shape):
 
 
 x  = tf.placeholder( tf.float32, [ None, num_of_feature ] )
+W1 = weight_variable( [ num_of_feature, num_of_hidden1 ] )
+b1 = bias_variable( [ num_of_hidden1 ] )
 
-weight = [ weight_variable( [ num_of_feature, hidden_layer[0] ] ) ]
+W2 = weight_variable( [ num_of_hidden1, num_of_class ] )
+b2 = bias_variable( [ num_of_class ] )
 
-for i in range( 1, len( hidden_layer ) ) :
-    weight.append( weight_variable( [ hidden_layer[ i - 1 ], hidden_layer[i] ] ) )
-weight.append( weight_variable( [ hidden_layer[-1], num_of_class ] ) )
-
-bias = list()
-for i in range( len( hidden_layer ) ) :
-    bias.append( bias_variable( hidden_layer[i] ) )
-bias.append( bias_variable( num_of_class )
-
-#hidden = [ tf.nn.relu( tf.matmul( x, weight[0] ) + bias[0] ) ]
-hidden = list( tf.nn.relu( tf.matmul( x, weight[0] ) + bias[0] ) )
-
-for i in range( 1, len( hidden_layer ) ) :
-    hidden.append( tf.nn.relu( tf.matmul( hidden[ i - 1 ], weight[i] ) + bias[i] )
-
-y  = tf.nn.softmax( tf.matmul( hidden[-1], weight[-1] ) + bias[-1] )
+hidden1 = tf.nn.relu( tf.matmul( x, W1 ) + b1 )
+y  = tf.nn.softmax( tf.matmul( hidden1, W2 ) + b2 )
 y_ = tf.placeholder( tf.float32, [ None, num_of_class ] )
 
 cross_entropy = tf.reduce_mean( -tf.reduce_sum( y_ * tf.log(y) , reduction_indices = [1] ) )
