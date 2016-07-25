@@ -12,7 +12,7 @@ import numpy      as np
 
 num_of_hidden1 = 12
 num_of_step = 1000
-dfrm = pd.read_csv('data/iris.csv')
+dfrm = pd.read_csv('iris.csv')
 
 #
 # Convert Data.Frame to numpy array
