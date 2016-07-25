@@ -10,8 +10,9 @@ import numpy      as np
 #                       #
 #########################
 
-num_of_hidden1 = 12
-num_of_step = 1000
+num_of_hidden1 = 9
+num_of_hidden2 = 6
+num_of_step = 5000
 dfrm = pd.read_csv('iris.csv')
 
 #
@@ -67,15 +68,20 @@ x  = tf.placeholder( tf.float32, [ None, num_of_feature ] )
 W1 = weight_variable( [ num_of_feature, num_of_hidden1 ] )
 b1 = bias_variable( [ num_of_hidden1 ] )
 
-W2 = weight_variable( [ num_of_hidden1, num_of_class ] )
-b2 = bias_variable( [ num_of_class ] )
+W2 = weight_variable( [ num_of_hidden1, num_of_hidden2 ] )
+b2 = bias_variable( [ num_of_hidden2 ] )
+
+W3 = weight_variable( [ num_of_hidden2, num_of_class ] )
+b3 = bias_variable( [ num_of_class ] )
 
 hidden1 = tf.nn.relu( tf.matmul( x, W1 ) + b1 )
-y  = tf.nn.softmax( tf.matmul( hidden1, W2 ) + b2 )
+hidden2 = tf.nn.relu( tf.matmul( hidden1, W2 ) + b2 )
+
+y  = tf.nn.softmax( tf.matmul( hidden2, W3 ) + b3 )
 y_ = tf.placeholder( tf.float32, [ None, num_of_class ] )
 
 cross_entropy = tf.reduce_mean( -tf.reduce_sum( y_ * tf.log(y) , reduction_indices = [1] ) )
-train_step = tf.train.GradientDescentOptimizer( 0.1 ).minimize( cross_entropy )
+train_step = tf.train.GradientDescentOptimizer( 0.01 ).minimize( cross_entropy )
 
 
 #
@@ -111,9 +117,11 @@ print()
 
 W1_s = np.matrix( sess.run(W1) )
 W2_s = np.matrix( sess.run(W2) )
+W3_s = np.matrix( sess.run(W3) )
 
 b1_s = np.matrix( sess.run(b1) )
 b2_s = np.matrix( sess.run(b2) )
+b3_s = np.matrix( sess.run(b3) )
 
 
 #########################
@@ -123,15 +131,18 @@ b2_s = np.matrix( sess.run(b2) )
 #########################
 
 Feature  = np.matrix( feature )
-hid_temp  = ( Feature * W1_s + b1_s )
-Hidden1 = ( hid_temp + abs( hid_temp ) ) / 2        # ReLU
-
-Result = Hidden1 * W2_s + b2_s
+hid_temp1 = Feature * W1_s + b1_s
+Hidden1 = ( hid_temp1 + abs( hid_temp1 ) ) / 2        # ReLU
+hid_temp2 = Hidden1 * W2_s + b2_s
+Hidden2 = ( hid_temp2 + abs( hid_temp2 ) ) / 2        # ReLU
+Result = Hidden2 * W3_s + b3_s
 
 Class    = list( map ( lambda x : class_inv_map.get(np.argmax(x)), Result ) )
 Original = list( map ( lambda x : x.split(',')[-1], data[:-1] ) )
 
-print( [ [ i, orig, clas ] for i, orig, clas in zip( range( min( len(Original), len(Class) ) ), Original, Class ) if orig != clas ] )
+
+diff = [ [ i, orig, clas ] for i, orig, clas in zip( range( min( len(Original), len(Class) ) ), Original, Class ) if orig != clas ]
+print( diff )
 
 #print( '\n'.join( [ str(elem) for elem in [ [ i, orig, clas ] for i, orig, clas in zip( range( min( len(Original), len(Class) ) ), Original, Class ) ] ] ) )
 
@@ -145,6 +156,8 @@ print( [ [ i, orig, clas ] for i, orig, clas in zip( range( min( len(Original), 
 
 #print( 'W1 :\n', W1_s )
 #print( 'W2 :\n', W2_s )
+#print( 'W3 :\n', W3_s )
 
 #print( 'b1 :\n', b1_s )
 #print( 'b2 :\n', b2_s )
+#print( 'b3 :\n', b3_s )
